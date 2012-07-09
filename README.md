@@ -31,7 +31,7 @@ Now the model is ready to do basic record retrieval (even paginated), inserts an
 
 These simple examples won't exactly show you the power behind this CRUD model, but we do need to get the basics out of the way.
 
-	// IN YOUR CONTROLLER
+	// IN THE CONTROLLER
 
 	// Load the model as you normally would
 	$this->load->model('mdl_blog_posts');
@@ -108,7 +108,8 @@ One thing I've always hated about CodeIgniter is the amount of redundant configu
 
 Wait, what? That's it? Yep. Here's a more complete example:
 
-	// THE CONTROLLER
+	// IN THE CONTROLLER
+
 	// Load the model
 	$this->load->model('mdl_blog_posts');
 
@@ -124,7 +125,8 @@ Wait, what? That's it? Yep. Here's a more complete example:
 	// Load the view
 	$this->load->view('blog', $data);
 
-	// THE VIEW
+	// IN THE VIEW
+
 	<?php foreach ($results as $result) { ?>
 	<!-- Do whatever -->
 	<?php } ?>
@@ -230,4 +232,78 @@ By default, the run_validation() method will look for a method in the child mode
 As long as the method is returning an array of CodeIgniter validation rules, that's all that matters.
 
 The validation array is closely tied to how the CRUD model will handle the form data. Notice in the rule array above, the category_id field doesn't have any rules associated with it. This is because, in this example, that particular field is not required and does not need any special validation. It must exist in the array, however, so the CRUD model knows to include it when saving the record, or when re-populating the form.
+
+## Saving Data
+
+First, let's look at how a form method might be used from a controller to interact with a model which extends the CRUD model:
+
+	public function form($id = NULL)
+	{
+		// Check to see if the form validates
+		if ($this->mdl_blog_posts->run_validation()
+		{
+			// It validates -- save the record and redirect to index
+			$this->mdl_blog_posts->save(NULL, $id);
+			redirect('blog/index);
+		}
+
+		// Prepare the form if it hasn't been submitted
+		if (!$_POST)
+		{
+			$this->mdl_blog_posts->prep_form($id);
+		}
+
+		// Load the view
+		$this->load->view('blog_form');
+	}
+
+On a closer look, there are really only two things which haven't yet been covered in this documentation.
+
+	$this->mdl_blog_posts->prep_form($id);
+
+The prep_form method should be executed only when the form has not yet been submitted (if (!$_POST)). If the $id variable contains a value, it will instruct the CRUD model to retrieve the appropriate record from the database and have the data ready to re-populate the form.
+
+	$this->mdl_blog_posts->save(NULL, $id);
+
+The save method (obviously) saves the form data. The fields which it saves is dependent upon the validation rules (remember earlier we included the category_id field in the validation rule array even though it didn't have any special rules).
+
+Now that we've seen the general logic a controller form method might have, let's take a look at how the view might look:
+
+	<form method="post">
+
+		<label>Title</label>
+		<input type="text" name="title" value="<?php echo $this->mdl_blog_posts->form_value('title'); ?>">
+
+		<label>Date</label>
+		<input type="text" name="post_date" value="<?php echo $this->mdl_blog_posts->form_value('post_date'); ?>">
+
+		<label>Category</label>
+		<select name="category_id">
+			<?php foreach ($categories as $category) { ?>
+			<option value="<?php echo $category->category_id; ?>" <?php if ($category->category_id == $this->mdl_blog_posts->form_value('category_id')) { ?>selected="selected"<?php } ?>><?php echo $category->category; ?></option>
+			<?php } ?>
+		</select>
+
+		<!-- You can get the picture from the above 3 fields -->
+
+	</form>
+
+The form_value('field_name') method will return the value currently assigned to the specified field. If prep_form($id) was used to re-populate the form for an edit, then form_value('field_name') will return the original value from the database. If the form has been submitted and fails validation, then it will return the last submitted value.
+
+Sometimes we need to manipulate our data a bit before it makes it from the form to the database. We'll override a method in the CRUD model to do this:
+
+	// IN THE Mdl_Blog_Posts MODEL
+	public function db_array()
+	{
+		// First, retrieve the default array
+		$db_array = parent::db_array();
+
+		// Next, manipulate as necessary
+		$db_array['post_date'] = strtotime($db_array['post_date']);
+
+		// Now, return the modified array
+		return $db_array;
+	}
+
+That's it. Nothing additional has to be done in the controller - it's all handled in the model. The CRUD model's db_array method looks at the validation rules which were run and builds an array to save to the database based off of those rules. The elements in the array correspond to the field elements of the validation rules.
 
