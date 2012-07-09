@@ -307,3 +307,20 @@ Sometimes we need to manipulate our data a bit before it makes it from the form 
 
 That's it. Nothing additional has to be done in the controller - it's all handled in the model. The CRUD model's db_array method looks at the validation rules which were run and builds an array to save to the database based off of those rules. The elements in the array correspond to the field elements of the validation rules.
 
+Let's do the same thing, but in reverse -- let's force the model to change the UNIX timestamp back into a human readable value so when it's re-populated back into the form, it's in the proper state:
+
+	// IN THE Mdl_Blog_Posts MODEL
+	public function prep_form($id)
+	{
+		// First, run the parent method
+		parent::prep_form($id);
+
+		// Next, manipulate as necessary
+		$this->set_form_value('post_date', date('m/d/Y', $this->form_value('post_date'));
+	}
+
+Now, when an existing record is edited and the post_date value is output back into the form, it will be formatted appropriately. Once again, it's all handled in the model - nothing to do in the controller or the view.
+
+## Summary
+
+This documentation should provide adequate usage examples for this CRUD model. The CRUD model can be used in any CodeIgniter project, and tries to adhere to native CodeIgniter query builder standards without straying far off in some stupid subset of logic. I hope you find this to be useful in your projects as much as I've found it useful in mine.
