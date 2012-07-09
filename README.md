@@ -150,4 +150,84 @@ The style of the pagination elements can be set by creating a config file with a
 		'next_tag_open'		=> '<li>',
 		'next_tag_close'	=> '</li>',
 		'prev_tag_open'		=> '<li>',
-		'prev_tag_close'	=> '</li>',
+		'prev_tag_close'	=> '</li>'
+	);
+
+One drawback to the pagination feature is it won't generate page links properly if it's being loaded on a page without the method name included in the URI. For example, if our paginated results are being generated from a controller named Blog and a method named index, then the URI must have the full index.php/blog/index, and not just index.php/blog.
+
+## Form Validation
+
+Let's add a new method into our model:
+
+	class Mdl_Blog_Posts extends CRUD_Model
+	{
+		public $table = 'blog_posts';
+		public $primary_key = 'blog_posts.post_id';
+
+		public function default_select()
+		{
+			$this->db->select('blog_posts.*, categories.*, authors.author_name'):
+		}
+
+		public function default_order_by()
+		{
+			$this->db->order_by('blog_posts.post_date DESC');
+		}
+
+		public function default_join()
+		{
+			$this->db->join('authors', 'authors.author_id = blog_posts.author_id');
+			$this->db->join('categories', 'categories.category_id = blog_posts.category_id');
+		}
+
+		public function validation_rules()
+		{
+			return array(
+				'post_title' => array(
+					'field' => 'post_title',
+					'label' => 'Title',
+					'rules' => 'required'
+				),
+				'post_content' => array(
+					'field' => 'post_content',
+					'label' => 'Content',
+					'rules' => 'required'
+				),
+				'category_id' => array(
+					'field' => 'category_id',
+					'label' => 'Category'
+				),
+				'post_date' => array(
+					'field' => 'post_date',
+					'label' => 'Date',
+					'rules' => 'required'
+				)
+			);
+		}
+	}
+
+As you can see, validation rules are written into the model as a method which returns an array containing validation rules which are recognized by CodeIgniter.
+
+To run validation:
+
+	// IN THE CONTROLLER
+	if ($this->mdl_blog_posts->run_validation())
+	{
+		// Save the data or whatever needs to be done
+	}
+	else
+	{
+		// Yell at the user for not filling the form in properly
+	}
+
+By default, the run_validation() method will look for a method in the child model called "validation_rules". However, the rule method doesn't have to be named "validation_rules", and there can be more than one. To specify a particular rule method:
+
+	if ($this->mdl_blog_posts->run_validation('some_other_validation_rule_method'))
+	{
+		// Save the data or whatever needs to be done
+	}
+
+As long as the method is returning an array of CodeIgniter validation rules, that's all that matters.
+
+The validation array is closely tied to how the CRUD model will handle the form data. Notice in the rule array above, the category_id field doesn't have any rules associated with it. This is because, in this example, that particular field is not required and does not need any special validation. It must exist in the array, however, so the CRUD model knows to include it when saving the record, or when re-populating the form.
+
