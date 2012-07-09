@@ -57,7 +57,7 @@ Wait a minute... can't you do all of these examples by using CI's standard $this
 
 Yes indeed, you could. However, up above, I told you that we needed to get the basics out of the way. Those were the basics, and now they're out of the way. On to the fun stuff.
 
-## Advanced Record Retrieval
+## Defining the Model
 
 Let's take a look at the model code below:
 
@@ -92,7 +92,62 @@ Now we'll jump back over to our controller:
 	$all_records = $this->mdl_blog_posts->get()->result();
 
 	// This is the query the get() method from the line above would produce:
-	// SELECT `blog_posts`.*, `categories`.*, `authors`.`author_name` FROM (`blog_posts`) JOIN `authors` AS authors ON `authors`.`author_id` = `blog_posts`.`author_id` JOIN `categories` AS categories ON `categories`.`category_id` = `blog_posts`.`category_id` ORDER BY `blog_posts`.`post_date` DESC
+	// SELECT `blog_posts`.*, `categories`.*, `authors`.`author_name` 
+	// FROM (`blog_posts`) 
+	// JOIN `authors` AS authors ON `authors`.`author_id` = `blog_posts`.`author_id` 
+	// JOIN `categories` AS categories ON `categories`.`category_id` = `blog_posts`.`category_id` 
+	// ORDER BY `blog_posts`.`post_date` DESC
 
-As you can see, our model is now becoming somewhat of a definition of our data and its structure instead of a class with a bunch of methods which build queries and return results and all that junk. Much cleaner, simpler, and easier to read.
+As you can see, our model is now becoming more of a definition of our data and its structure instead of a class with a bunch of stupid, jumbled methods which build queries and return results and all that junk. Much cleaner, simpler, and easier to read.
 
+## Single Line Pagination
+
+One thing I've always hated about CodeIgniter is the amount of redundant configuration required to make pagination work. Have a look at how simple the CRUD model makes pagination:
+
+	$paged_results = $this->mdl_blog_posts->paginate()->result();
+
+Wait, what? That's it? Yep. Here's a more complete example:
+
+	// THE CONTROLLER
+	// Load the model
+	$this->load->model('mdl_blog_posts');
+
+	// Retrieve the paged results
+	$paged_results = $this->mdl_blog_posts->paginate()->result();
+
+	// Prepare the data to send to the view
+	$data = array(
+		'results' => $paged_results,
+		'page_links' => $this->mdl_blog_posts->page_links
+	);
+
+	// Load the view
+	$this->load->view('blog', $data);
+
+	// THE VIEW
+	<?php foreach ($results as $result) { ?>
+	<!-- Do whatever -->
+	<?php } ?>
+	
+	<?php echo $page_links; ?>
+
+The style of the pagination elements can be set by creating a config file with an array $config['pagination_style']. Here's an example:
+
+	// Location: application/config/pagination_config.php
+	$config['pagination_style'] = array(
+		'first_link'		=> '&lsaquo;&lsaquo;',
+		'next_link'			=> '&rsaquo;',
+		'prev_link'			=> '&lsaquo;',
+		'last_link'			=> '&rsaquo;&rsaquo;',
+		'full_tag_open'		=> '<div class="pagination"><ul>',
+		'full_tag_close'	=> '</ul></div>',
+		'first_tag_open'	=> '<li>',
+		'first_tag_close'	=> '</li>',
+		'last_tag_open'		=> '<li>',
+		'last_tag_close'	=> '</li>',
+		'cur_tag_open'		=> '<li class="active"><a href="#">',
+		'cur_tag_close'		=> '</a></li>',
+		'next_tag_open'		=> '<li>',
+		'next_tag_close'	=> '</li>',
+		'prev_tag_open'		=> '<li>',
+		'prev_tag_close'	=> '</li>',
