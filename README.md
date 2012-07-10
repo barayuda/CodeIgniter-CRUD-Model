@@ -186,7 +186,7 @@ And consider the following controller code:
 
 	// The results from the above query will be a standard select statement on the blog_posts table, along with the embedded subquery.
 
-Optional query building methods can be named anything, and can be passed to any of the 3 get methods. They can include joins, wheres, selects, etc, etc.
+Optional query building methods can be named anything, and can be passed to any of the 3 get methods. They can include joins, wheres, selects, or any of the other native CodeIgniter active record (ahem... query builder) methods.
 
 ## Form Validation
 
