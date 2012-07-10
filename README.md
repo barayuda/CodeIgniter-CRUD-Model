@@ -25,7 +25,7 @@ Once your model extends the CRUD model, you'll need to define two critical prope
 		public $primary_key = 'blog_posts.post_id';
 	}
 
-Now the model is ready to do basic record retrieval (even paginated), inserts and updates and deletes (hence, the basic CRUD methods).
+Now the model is ready to do basic record retrieval (even paginated).
 
 ## Basic Record Retrieval
 
@@ -157,6 +157,37 @@ The style of the pagination elements can be set by creating a config file with a
 
 One drawback to the pagination feature is it won't generate page links properly if it's being loaded on a page without the method name included in the URI. For example, if our paginated results are being generated from a controller named Blog and a method named index, then the URI must have the full index.php/blog/index, and not just index.php/blog.
 
+## Optional Query Building
+
+Many times, you may have a query which should be built and run the same way 99% of the time, but a bit differently 1% of the time. This CRUD model allows for us to easily specify when we want the query to run differently.
+
+Consider the following model:
+
+	class Mdl_Blog_Posts extends CRUD_Model
+	{
+		public $table = 'blog_posts';
+		public $primary_key = 'blog_posts.post_id';
+
+		public function num_comments()
+		{
+			$this->db->select('(SELECT COUNT(*) FROM blog_comments WHERE blog_comments.post_id = blog_posts.post_id) AS num_comments');
+		}
+	}
+
+And consider the following controller code:
+
+	// This will retrieve all records and will not pay any attention to the num_comments() method in the model
+	$posts = $this->mdl_blog_posts->get()->result();
+
+	// The results from the above query will be a standard select statement on the blog_posts table
+
+	// This will tell the model to also include the additional clauses / conditions / statements when building the query:
+	$posts = $this->mdl_blog_posts->get('num_comments')->result();
+
+	// The results from the above query will be a standard select statement on the blog_posts table, along with the embedded subquery.
+
+Optional query building methods can be named anything, and can be passed to any of the 3 get methods. They can include joins, wheres, selects, etc, etc.
+
 ## Form Validation
 
 Let's add a new method into our model:
@@ -243,7 +274,7 @@ First, let's look at how a form method might be used from a controller to intera
 		if ($this->mdl_blog_posts->run_validation()
 		{
 			// It validates -- save the record and redirect to index
-			$this->mdl_blog_posts->save(NULL, $id);
+			$this->mdl_blog_posts->save($id);
 			redirect('blog/index);
 		}
 
@@ -263,9 +294,9 @@ On a closer look, there are really only two things which haven't yet been covere
 
 The prep_form method should be executed only when the form has not yet been submitted (if (!$_POST)). If the $id variable contains a value, it will instruct the CRUD model to retrieve the appropriate record from the database and have the data ready to re-populate the form.
 
-	$this->mdl_blog_posts->save(NULL, $id);
+	$this->mdl_blog_posts->save($id);
 
-The save method (obviously) saves the form data. The fields which it saves is dependent upon the validation rules (remember earlier we included the category_id field in the validation rule array even though it didn't have any special rules).
+The save method (obviously) saves the form data. The fields which it saves is dependent upon the validation rules (remember earlier we included the category_id field in the validation rule array even though it didn't have any special rules). The save method will perform an insert or an update accordingly, based on whether or not an $id is passed to it, and if the $id actually has a value or not.
 
 Now that we've seen the general logic a controller form method might have, let's take a look at how the view might look:
 
