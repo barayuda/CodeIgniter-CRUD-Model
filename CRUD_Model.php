@@ -196,7 +196,7 @@ class CRUD_Model extends CI_Model {
 		return $this->where($this->primary_key, $id)->get()->row();
 	}
 
-	public function save($db_array = NULL, $id = NULL)
+	public function save($id = NULL, $db_array = NULL)
 	{
 		if (!$db_array)
 		{
