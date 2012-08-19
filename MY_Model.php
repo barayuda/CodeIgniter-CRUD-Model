@@ -6,7 +6,7 @@
  * 
  * Install this file as application/core/CRUD_Model.php
  * 
- * @package		CodeIgniter
+ * @package	CodeIgniter
  * @author		Jesse Terry
  * @copyright	Copyright (c) 2012, Jesse Terry
  * @link		http://developer13.com
@@ -30,27 +30,27 @@
  * THE SOFTWARE.
  * 
  */
-class CRUD_Model extends CI_Model {
+class MY_Model extends CI_Model {
 
 	public $table;
 	public $primary_key;
-	public $default_limit = 15;
+	public $default_limit	 = 15;
 	public $page_links;
 	public $query;
-	public $form_values = array();
-	protected $default_validation_rules = 'validation_rules';
+	public $form_values	 = array();
+	protected $default_validation_rules	 = 'validation_rules';
 	protected $validation_rules;
 	public $validation_errors;
 	public $total_rows;
 	public $date_created_field;
 	public $date_modified_field;
-	public $native_methods = array(
+	public $native_methods				 = array(
 		'select', 'select_max', 'select_min', 'select_avg', 'select_sum', 'join',
 		'where', 'or_where', 'where_in', 'or_where_in', 'where_not_in', 'or_where_not_in',
 		'like', 'or_like', 'not_like', 'or_not_like', 'group_by', 'distinct', 'having',
 		'or_having', 'order_by', 'limit'
 	);
-	
+
 	public function __call($name, $arguments)
 	{
 		call_user_func_array(array($this->db, $name), $arguments);
@@ -69,7 +69,7 @@ class CRUD_Model extends CI_Model {
 		{
 			$this->set_defaults();
 		}
-		
+
 		foreach ($with as $method)
 		{
 			$this->$method();
@@ -96,7 +96,7 @@ class CRUD_Model extends CI_Model {
 		foreach ($native_methods as $native_method)
 		{
 			$native_method = 'default_' . $native_method;
-			
+
 			if (method_exists($this, $native_method))
 			{
 				$this->$native_method();
@@ -111,14 +111,14 @@ class CRUD_Model extends CI_Model {
 	public function paginate($with = array())
 	{
 		$uri_segment = '';
-		$offset = 0;
-		$per_page = $this->default_limit;
+		$offset		 = 0;
+		$per_page	 = $this->default_limit;
 
 		$this->load->helper('url');
 		$this->load->library('pagination');
 
 		$this->set_defaults();
-		
+
 		foreach ($with as $method)
 		{
 			$this->$method();
@@ -149,14 +149,14 @@ class CRUD_Model extends CI_Model {
 		{
 			$base_url = site_url($this->uri->uri_string() . '/page/');
 		}
-		
+
 		$config = array(
-			'base_url' => $base_url,
-			'uri_segment' => $uri_segment,
-			'total_rows' => $this->total_rows,
-			'per_page' => $per_page
+			'base_url'		 => $base_url,
+			'uri_segment'	 => $uri_segment,
+			'total_rows'	 => $this->total_rows,
+			'per_page'		 => $per_page
 		);
-		
+
 		if ($this->config->item('pagination_style'))
 		{
 			$config = array_merge($config, $this->config->item('pagination_style'));
@@ -170,14 +170,14 @@ class CRUD_Model extends CI_Model {
 		 * Done with pagination, now on to the paged results
 		 */
 		$this->set_defaults();
-		
+
 		foreach ($with as $method)
 		{
 			$this->$method();
 		}
 
 		$this->db->limit($per_page, $offset);
-		
+
 		$this->query = $this->db->get($this->table);
 
 		return $this;
@@ -192,7 +192,7 @@ class CRUD_Model extends CI_Model {
 		{
 			$this->$method();
 		}
-		
+
 		return $this->where($this->primary_key, $id)->get()->row();
 	}
 
@@ -211,9 +211,9 @@ class CRUD_Model extends CI_Model {
 			}
 
 			$this->db->insert($this->table, $db_array);
-			
+
 			$this->session->set_flashdata('alert_success', 'Record successfully created.');
-			
+
 			return $this->db->insert_id();
 		}
 		else
@@ -225,9 +225,9 @@ class CRUD_Model extends CI_Model {
 
 			$this->db->where($this->primary_key, $id);
 			$this->db->update($this->table, $db_array);
-			
+
 			$this->session->set_flashdata('alert_success', 'Record successfully updated.');
-			
+
 			return $id;
 		}
 	}
@@ -261,7 +261,7 @@ class CRUD_Model extends CI_Model {
 	{
 		$this->db->where($this->primary_key, $id);
 		$this->db->delete($this->table);
-		
+
 		$this->session->set_flashdata('alert_success', 'Record successfully deleted.');
 	}
 

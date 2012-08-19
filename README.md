@@ -7,7 +7,7 @@ Extend this base model in CodeIgniter to make your database interactions super s
 
 For sake of simplicity, we'll pretend to work on a model which interacts with a table containing blog posts.
 
-To install, simply copy the file as CRUD_Model.php to the application/core folder of your CodeIgniter installation.
+To install, simply copy the file as MY_Model.php to the application/core folder of your CodeIgniter installation.
 
 Then, instead of:
 
@@ -15,11 +15,11 @@ Then, instead of:
 
 Extend the CRUD Model:
 
-	class Mdl_Blog_Posts extends CRUD_Model
+	class Mdl_Blog_Posts extends MY_Model
 
 Once your model extends the CRUD model, you'll need to define two critical properties:
 
-	class Mdl_Blog_Posts extends CRUD_Model
+	class Mdl_Blog_Posts extends MY_Model
 	{
 		public $table = 'blog_posts';
 		public $primary_key = 'blog_posts.post_id';
@@ -61,7 +61,7 @@ Yes indeed, you could. However, up above, I told you that we needed to get the b
 
 Let's take a look at the model code below:
 
-	class Mdl_Blog_Posts extends CRUD_Model
+	class Mdl_Blog_Posts extends MY_Model
 	{
 		public $table = 'blog_posts';
 		public $primary_key = 'blog_posts.post_id';
@@ -163,7 +163,7 @@ Many times, you may have a query which should be built and run the same way 99% 
 
 Consider the following model:
 
-	class Mdl_Blog_Posts extends CRUD_Model
+	class Mdl_Blog_Posts extends MY_Model
 	{
 		public $table = 'blog_posts';
 		public $primary_key = 'blog_posts.post_id';
@@ -192,7 +192,7 @@ Optional query building methods can be named anything, and can be passed to any 
 
 Let's add a new method into our model:
 
-	class Mdl_Blog_Posts extends CRUD_Model
+	class Mdl_Blog_Posts extends MY_Model
 	{
 		public $table = 'blog_posts';
 		public $primary_key = 'blog_posts.post_id';
