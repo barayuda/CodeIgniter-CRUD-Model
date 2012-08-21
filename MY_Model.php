@@ -50,12 +50,13 @@ class MY_Model extends CI_Model {
 		'like', 'or_like', 'not_like', 'or_not_like', 'group_by', 'distinct', 'having',
 		'or_having', 'order_by', 'limit'
 	);
+	public $user_funcs = array();
 
 	public function __call($name, $arguments)
 	{
-		call_user_func_array(array($this->db, $name), $arguments);
-
-		return $this;
+        call_user_func_array(array($this->db, $name), $arguments);
+        $this->user_funcs[] = array($name, $arguments);
+        return $this;
 	}
 
 	/**
@@ -170,6 +171,11 @@ class MY_Model extends CI_Model {
 		 * Done with pagination, now on to the paged results
 		 */
 		$this->set_defaults();
+		
+        foreach ($this->user_funcs as $func)
+        {
+            call_user_func_array(array($this->db, $func[0]), $func[1]);
+        }
 
 		foreach ($with as $method)
 		{
